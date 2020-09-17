@@ -1,12 +1,15 @@
-FROM nvidia/cuda:10.1-devel-ubuntu18.04
+FROM nvidia/cuda:10.2-devel-ubuntu18.04 AS build
 
 WORKDIR /
 
 # Package and dependency setup
-RUN apt-get update \
-    && apt-get -y install software-properties-common \
-    && apt-get update \
-    && apt-get install -y git cmake build-essential
+RUN apt-get update && \
+    apt-get install -yq --no-install-recommends \
+        software-properties-common \
+        git \
+        cmake \
+        build-essential \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Add source files
 ADD . /ethminer
@@ -18,6 +21,11 @@ RUN mkdir build; \
     cmake .. -DETHASHCUDA=ON -DAPICORE=ON -DETHASHCL=OFF -DBINKERN=OFF; \
     cmake --build . -- -j; \
     make install;
+
+FROM nvidia/cuda:10.2-base-ubuntu18.04
+
+# Copy only executable from build
+COPY --from=build /usr/local/bin/ethminer /usr/local/bin/
 
 # Miner API port inside container
 ENV ETHMINER_API_PORT=3000
