@@ -15,7 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Gateless Gate Sharp.  If not, see <http://www.gnu.org/licenses/>.
 
-
+#define OPENCL_PLATFORM_UNKNOWN 0
+#define OPENCL_PLATFORM_AMD     1
+#define OPENCL_PLATFORM_CLOVER  2
+#define OPENCL_PLATFORM_NVIDIA  3
+#define OPENCL_PLATFORM_INTEL   4
 
 #if (defined(__Tahiti__) || defined(__Pitcairn__) || defined(__Capeverde__) || defined(__Oland__) || defined(__Hainan__))
 #define LEGACY
@@ -26,6 +30,22 @@
 #endif
 
 #if defined(cl_amd_media_ops)
+#if PLATFORM == OPENCL_PLATFORM_CLOVER
+/*
+ * MESA define cl_amd_media_ops but no amd_bitalign() defined.
+ * https://github.com/openwall/john/issues/3454#issuecomment-436899959
+ */
+uint2 amd_bitalign(uint2 src0, uint2 src1, uint2 src2)
+{
+    uint2 dst;
+    __asm("v_alignbit_b32 %0, %2, %3, %4\n"
+          "v_alignbit_b32 %1, %5, %6, %7"
+          : "=v" (dst.x), "=v" (dst.y)
+          : "v" (src0.x), "v" (src1.x), "v" (src2.x),
+            "v" (src0.y), "v" (src1.y), "v" (src2.y));
+    return dst;
+}
+#endif
 #pragma OPENCL EXTENSION cl_amd_media_ops : enable
 #elif defined(cl_nv_pragma_unroll)
 uint amd_bitalign(uint src0, uint src1, uint src2)
@@ -206,34 +226,22 @@ typedef union {
 #define MIX(x) \
 do { \
     if (get_local_id(0) == lane_idx) { \
-        uint s = mix.s0; \
-        s = select(mix.s1, s, (x) != 1); \
-        s = select(mix.s2, s, (x) != 2); \
-        s = select(mix.s3, s, (x) != 3); \
-        s = select(mix.s4, s, (x) != 4); \
-        s = select(mix.s5, s, (x) != 5); \
-        s = select(mix.s6, s, (x) != 6); \
-        s = select(mix.s7, s, (x) != 7); \
-        buffer[hash_id] = fnv(init0 ^ (a + x), s) % dag_size; \
+        buffer[hash_id] = fnv(init0 ^ (a + x), ((uint *)&mix)[x]) % dag_size; \
     } \
     barrier(CLK_LOCAL_MEM_FENCE); \
-    __global hash128_t const* g_dag = (__global hash128_t const*) _g_dag0; \
-    mix = fnv(mix, g_dag[buffer[hash_id]].uint8s[thread_id]); \
+    uint idx = buffer[hash_id]; \
+    __global hash128_t const* g_dag; \
+    g_dag = (__global hash128_t const*) _g_dag0; \
+    if (idx & 1) \
+        g_dag = (__global hash128_t const*) _g_dag1; \
+    mix = fnv(mix, g_dag[idx >> 1].uint8s[thread_id]); \
 } while(0)
 
 #else
 
 #define MIX(x) \
 do { \
-    uint s = mix.s0; \
-    s = select(mix.s1, s, (x) != 1); \
-    s = select(mix.s2, s, (x) != 2); \
-    s = select(mix.s3, s, (x) != 3); \
-    s = select(mix.s4, s, (x) != 4); \
-    s = select(mix.s5, s, (x) != 5); \
-    s = select(mix.s6, s, (x) != 6); \
-    s = select(mix.s7, s, (x) != 7); \
-    buffer[get_local_id(0)] = fnv(init0 ^ (a + x), s) % dag_size; \
+    buffer[get_local_id(0)] = fnv(init0 ^ (a + x), ((uint *)&mix)[x]) % dag_size; \
     uint idx = buffer[lane_idx]; \
     __global hash128_t const* g_dag; \
     g_dag = (__global hash128_t const*) _g_dag0; \
