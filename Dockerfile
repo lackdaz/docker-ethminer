@@ -12,7 +12,7 @@ RUN apt-get update && \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Add source files
-ADD . /ethminer
+COPY . /ethminer
 WORKDIR /ethminer
 
 # Build. Use all cores.
@@ -27,13 +27,16 @@ FROM nvidia/cuda:10.2-base-ubuntu18.04
 # Copy only executable from build
 COPY --from=build /usr/local/bin/ethminer /usr/local/bin/
 
-# Miner API port inside container
-ENV ETHMINER_API_PORT=3000
-EXPOSE ${ETHMINER_API_PORT}
-
 # Prevent GPU overheading by stopping in 90C and starting again in 60C
 ENV GPU_TEMP_STOP=90
-ENV GPU_TEMP_START=65
+ENV GPU_TEMP_START=60
+
+# These need to be given in command line.
+ENV ETH_WALLET=0x00
+ENV WORKER_NAME="none"
+ENV ETHMINER_API_PORT=3000
+
+EXPOSE ${ETHMINER_API_PORT}
 
 # Start miner. Note that wallet address and worker name need to be set
 # in the container launch.
