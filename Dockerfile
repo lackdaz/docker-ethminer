@@ -33,7 +33,7 @@ EXPOSE ${ETHMINER_API_PORT}
 
 # Prevent GPU overheading by stopping in 90C and starting again in 60C
 ENV GPU_TEMP_STOP=90
-ENV GPU_TEMP_START=60
+ENV GPU_TEMP_START=65
 
 # Start miner. Note that wallet address and worker name need to be set
 # in the container launch.
