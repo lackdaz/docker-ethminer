@@ -1,3 +1,4 @@
-# ignore some Git dirs
-.git
-.github
+# ignore git dirs
+**/.git*
+Dockerfile
+.vscode
