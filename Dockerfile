@@ -1,14 +1,14 @@
-FROM nvidia/cuda:10.2-devel-ubuntu18.04 AS build
+FROM nvidia/cuda:11.2-devel-ubuntu20.04 AS build
 
 WORKDIR /
 
 # Package and dependency setup
 RUN apt-get update && \
     apt-get install -yq --no-install-recommends \
-        software-properties-common \
-        git \
-        cmake \
-        build-essential \
+    software-properties-common \
+    git \
+    cmake \
+    build-essential \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Add source files
@@ -20,9 +20,9 @@ RUN mkdir build; \
     cd build; \
     cmake .. -DETHASHCUDA=ON -DAPICORE=ON -DETHASHCL=OFF -DBINKERN=OFF; \
     cmake --build . -- -j; \
-    make install;
+    make -j$(nproc) install;
 
-FROM nvidia/cuda:10.2-base-ubuntu18.04
+FROM nvidia/cuda:11.2-base-ubuntu20.04
 
 # Copy only executable from build
 COPY --from=build /usr/local/bin/ethminer /usr/local/bin/
@@ -40,9 +40,12 @@ EXPOSE ${ETHMINER_API_PORT}
 
 # Start miner. Note that wallet address and worker name need to be set
 # in the container launch.
-CMD ["bash", "-c", "/usr/local/bin/ethminer -U --api-port ${ETHMINER_API_PORT} \
---HWMON 2 --tstart ${GPU_TEMP_START} --tstop ${GPU_TEMP_STOP} --exit \
--P stratums://$ETH_WALLET.$WORKER_NAME@eu1.ethermine.org:5555 \
--P stratums://$ETH_WALLET.$WORKER_NAME@asia1.ethermine.org:5555 \
--P stratums://$ETH_WALLET.$WORKER_NAME@us1.ethermine.org:5555 \
--P stratums://$ETH_WALLET.$WORKER_NAME@us2.ethermine.org:5555"]
+CMD ["bash", "-c", "/usr/local/bin/ethminer -U \
+    # --farm-retries 10 --retry-delay 2 --farm-recheck 200 \
+    --api-port ${ETHMINER_API_PORT} \
+    --HWMON 2 --tstart ${GPU_TEMP_START} --tstop ${GPU_TEMP_STOP} --exit \
+    -P stratums://$ETH_WALLET.$WORKER_NAME@asia1.ethermine.org:5555 \
+    -P stratums://$ETH_WALLET.$WORKER_NAME@us1.ethermine.org:5555 \
+    -P stratums://$ETH_WALLET.$WORKER_NAME@us2.ethermine.org:5555 \
+    -P stratums://$ETH_WALLET.$WORKER_NAME@eu1.ethermine.org:5555 \
+    -P stratums://$ETH_WALLET.$WORKER_NAME@asia.sparkpool.com:3333"]
