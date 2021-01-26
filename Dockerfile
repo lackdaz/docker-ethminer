@@ -4,7 +4,7 @@ WORKDIR /
 
 # Package and dependency setup
 RUN apt-get update && \
-    apt-get install -yq --no-install-recommends \
+    DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
     software-properties-common \
     git \
     cmake \
@@ -22,7 +22,7 @@ RUN mkdir build; \
     cmake --build . -- -j; \
     make -j$(nproc) install;
 
-FROM nvidia/cuda:11.2-base-ubuntu20.04
+FROM nvidia/cuda:11.1.1-base-ubuntu20.04
 
 # Copy only executable from build
 COPY --from=build /usr/local/bin/ethminer /usr/local/bin/
