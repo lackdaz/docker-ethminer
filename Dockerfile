@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.2-devel-ubuntu20.04 AS build
+FROM nvidia/cuda:11.1.1-devel-ubuntu20.04 AS build
 
 WORKDIR /
 
