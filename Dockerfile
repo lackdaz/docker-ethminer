@@ -35,6 +35,7 @@ ENV GPU_TEMP_START=60
 ENV ETH_WALLET=0x00
 ENV WORKER_NAME="none"
 ENV ETHMINER_API_PORT=3000
+ENV GPU_INDEX=0
 
 EXPOSE ${ETHMINER_API_PORT}
 
@@ -44,8 +45,9 @@ CMD ["bash", "-c", "/usr/local/bin/ethminer -U \
     # --farm-retries 10 --retry-delay 2 --farm-recheck 200 \
     --api-port ${ETHMINER_API_PORT} \
     --HWMON 2 --tstart ${GPU_TEMP_START} --tstop ${GPU_TEMP_STOP} --exit \
+    --cuda-devices ${GPU_INDEX} \
+    -P stratums://$ETH_WALLET.$WORKER_NAME@eth-sg.flexpool.io:5555 \
+    -P stratums://$ETH_WALLET.$WORKER_NAME@eth-us-west.flexpool.io:5555 \
     -P stratums://$ETH_WALLET.$WORKER_NAME@asia1.ethermine.org:5555 \
     -P stratums://$ETH_WALLET.$WORKER_NAME@us1.ethermine.org:5555 \
-    -P stratums://$ETH_WALLET.$WORKER_NAME@us2.ethermine.org:5555 \
-    -P stratums://$ETH_WALLET.$WORKER_NAME@eu1.ethermine.org:5555 \
     -P stratums://$ETH_WALLET.$WORKER_NAME@asia.sparkpool.com:3333"]

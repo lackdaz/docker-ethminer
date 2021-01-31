@@ -19,13 +19,12 @@ export DISPLAY=:0
 sleep 1
 
 
-# Setting for lightdm
 # DISPLAY=:0 XAUTHORITY=/var/run/lightdm/root/:0 nvidia-settings -a "[gpu:0]/GPUMemoryTransferRateOffsetAllPerformanceLevels=${GPU_MEM_OFFSET}" -a "[gpu:0]/GPUGraphicsClockOffsetAllPerformanceLevels=${GPU_CLOCK_OFFSET}"
 
-# Setting for only one gpu
 # XAUTHORITY=/run/user/1000/gdm/Xauthority nvidia-settings -a "[gpu:0]/GPUMemoryTransferRateOffsetAllPerformanceLevels=${GPU_MEM_OFFSET}" -a "[gpu:0]/GPUGraphicsClockOffsetAllPerformanceLevels=${GPU_CLOCK_OFFSET}"
 
-# One-time setting for all gpus
 XAUTHORITY=/run/user/1000/gdm/Xauthority nvidia-settings -a "GpuPowerMizerMode=1" -a "GPUMemoryTransferRateOffsetAllPerformanceLevels=${GPU_MEM_OFFSET}" -a "GPUGraphicsClockOffsetAllPerformanceLevels=${GPU_CLOCK_OFFSET}"
+
+sudo chvt 6
 
 exit 0
