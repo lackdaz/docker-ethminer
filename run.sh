@@ -4,5 +4,5 @@ docker run -e WORKER_NAME=farm1 \
     --runtime nvidia --gpus all \
     --restart unless-stopped \
     -e ETH_WALLET=0x18E02B0032c5C1aBc2A92c97FE149028e8eBAfdc \
-    -e GPU_INDEX="0 1" \
-    -P -d ethminer:flexpool
+    -e GPU_INDEX="0" \
+    -P -d ethminer
