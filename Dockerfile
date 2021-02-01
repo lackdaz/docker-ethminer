@@ -46,8 +46,8 @@ CMD ["bash", "-c", "/usr/local/bin/ethminer -U \
     --api-port ${ETHMINER_API_PORT} \
     --HWMON 2 --tstart ${GPU_TEMP_START} --tstop ${GPU_TEMP_STOP} --exit \
     --cuda-devices ${GPU_INDEX} \
-    -P stratum1+ssl://$ETH_WALLET.$WORKER_NAME@eth-sg.flexpool.io:5555 \
-    -P stratum1+ssl://$ETH_WALLET.$WORKER_NAME@eth-us-west.flexpool.io:5555 \
+    -R -P stratum1+ssl://$ETH_WALLET.$WORKER_NAME@eth-sg.flexpool.io:5555 \
+    -R -P stratum1+ssl://$ETH_WALLET.$WORKER_NAME@eth-us-west.flexpool.io:5555 \
     -P stratums://$ETH_WALLET.$WORKER_NAME@asia1.ethermine.org:5555 \
     -P stratums://$ETH_WALLET.$WORKER_NAME@us1.ethermine.org:5555 \
     -P stratums://$ETH_WALLET.$WORKER_NAME@asia.sparkpool.com:3333"]
